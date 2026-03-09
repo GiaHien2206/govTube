@@ -8,7 +8,7 @@ from joblib import load
 from flask import send_from_directory
 
 # ===================== Paths & ENV =====================
-PROJECT_ROOT = Path(__file__).resolve().parents[1]      # root project (parent of web_chatbot/)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]      # root project (parent of web_chatbot/)
 OUTPUTS = PROJECT_ROOT / "outputs"
 
 ENV_PATH = Path(__file__).resolve().parent / ".env" 
@@ -319,4 +319,5 @@ def chat():
     return jsonify({"type":"text", "text": reply})
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=3000, debug=True)
+    port = int(os.getenv("PORT", "3000"))
+    app.run(host="0.0.0.0", port=port, debug=False)
