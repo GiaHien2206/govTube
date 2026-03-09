@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GovTrendTube – Chatbot Demo</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:#121a33;
+      --muted:#a9b2d4;
+      --text:#e9edff;
+      --line:rgba(255,255,255,0.12);
+      --chip:rgba(255,255,255,0.10);
+      --chipHover:rgba(255,255,255,0.16);
+      --accent:#7aa2ff;
+      --good:#3ddc97;
+      --bad:#ff6b6b;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 800px at 10% 10%, rgba(122,162,255,0.25), transparent 50%),
+                  radial-gradient(1000px 700px at 90% 20%, rgba(61,220,151,0.12), transparent 50%),
+                  var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width: 980px;
+      margin: 24px auto;
+      padding: 0 14px 28px;
+      display:grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 14px;
+    }
+    @media (max-width: 980px){
+      .wrap{grid-template-columns:1fr}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+      overflow:hidden;
+    }
+    .header{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    h1{
+      font-size: 18px;
+      margin:0;
+      letter-spacing:0.2px;
+    }
+    .sub{
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color:var(--muted);
+    }
+    .badge{
+      font-size:12px;
+      padding: 6px 10px;
+      background: rgba(122,162,255,0.14);
+      border: 1px solid rgba(122,162,255,0.28);
+      color: var(--text);
+      border-radius: 999px;
+      white-space:nowrap;
+    }
+    .chat{
+      height: 520px;
+      padding: 12px 12px 0;
+      overflow:auto;
+    }
+    .msg{
+      display:flex;
+      margin: 10px 0;
+      gap: 10px;
+      align-items:flex-start;
+    }
+    .avatar{
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      flex: 0 0 auto;
+    }
+    .bubble{
+      max-width: 760px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      white-space: pre-wrap;
+      line-height: 1.35;
+      white-space: pre-wrap;
+    }
+    .msg.user .avatar{ background: rgba(61,220,151,0.14); border-color: rgba(61,220,151,0.25); }
+    .msg.user .bubble{ background: rgba(61,220,151,0.08); border-color: rgba(61,220,151,0.18); }
+    .msg.bot .avatar{ background: rgba(122,162,255,0.14); border-color: rgba(122,162,255,0.25); }
+    .msg.bot .bubble{ background: rgba(122,162,255,0.08); border-color: rgba(122,162,255,0.18); }
+
+    .composer{
+      padding: 12px;
+      border-top: 1px solid var(--line);
+      display:flex;
+      gap: 8px;
+      align-items:center;
+      background: rgba(0,0,0,0.10);
+    }
+    input[type="text"]{
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      outline:none;
+    }
+    input[type="text"]::placeholder{ color: rgba(233,237,255,0.45); }
+    button{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(122,162,255,0.35);
+      background: rgba(122,162,255,0.18);
+      color: var(--text);
+      cursor:pointer;
+      font-weight:600;
+      white-space:nowrap;
+    }
+    button:hover{ background: rgba(122,162,255,0.25); }
+    button:disabled{ opacity:0.6; cursor:not-allowed; }
+
+    .side{
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+    .section{
+      padding: 12px 14px;
+    }
+    .section h3{
+      margin: 0 0 8px;
+      font-size: 14px;
+      letter-spacing:0.2px;
+    }
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+    }
+    .chip{
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 12.5px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .chip:hover{ background: var(--chipHover); }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .mini{
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      background: rgba(255,255,255,0.04);
+    }
+    .mini label{
+      font-size: 12px;
+      color: var(--muted);
+      display:block;
+      margin-bottom: 6px;
+    }
+    .mini input{
+      width:100%;
+      padding: 9px 10px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      outline:none;
+    }
+    .row{
+      display:flex; gap: 8px; margin-top: 10px;
+    }
+    .row button{
+      width: 100%;
+      border-color: rgba(61,220,151,0.35);
+      background: rgba(61,220,151,0.16);
+    }
+    .row button:hover{ background: rgba(61,220,151,0.22); }
+    .hint{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+    .footer{
+      padding: 12px 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    code{ background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 8px; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- LEFT: CHAT -->
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1>GovTrendTube – Chatbot Demo</h1>
+          <p class="sub">Offline chatbot đọc số liệu thật từ <code>outputs/</code> (model, bảng so sánh, dataset info).</p>
+        </div>
+        <div class="badge">OFFLINE • Local</div>
+      </div>
+
+      <div id="chat" class="chat"></div>
+
+      <form id="form" class="composer">
+        <input id="input" type="text" placeholder="Nhập câu hỏi... (vd: 'dataset', 'bảng so sánh model', 'predict like=500 comment=20 hours=100')" />
+        <button id="btn" type="submit">Gửi</button>
+      </form>
+    </div>
+
+    <!-- RIGHT: QUICK ACTIONS -->
+    <div class="side">
+      <div class="card">
+        <div class="header">
+          <div>
+            <h1>Quick Questions</h1>
+            <p class="sub">Bấm để hỏi nhanh</p>
+          </div>
+        </div>
+        <div class="section">
+          <div class="chips" id="chips">
+            <div class="chip" data-q="GovTrendTube là gì">GovTrendTube là gì?</div>
+            <div class="chip" data-q="dataset">Dataset (bao nhiêu video + cột)</div>
+            <div class="chip" data-q="proxy label">Proxy label / threshold</div>
+            <div class="chip" data-q="bảng so sánh model">Bảng so sánh model</div>
+            <div class="chip" data-q="gov channels"> Gov Channels and videos</div>
+            <div class="chip" data-q="ablation"> Ablation</div>
+            <div class="chip" data-q="SHAP">SHAP / feature importance</div>
+            <div class="chip" data-q="timestep xai">Timestep XAI</div>
+            <div class="chip" data-q="burst stats">Burst stats</div>
+            <div class="chip" data-q="limitations">Limitations</div>         
+            <div class="chip" data-q="help">Help</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="header">
+          <div>
+            <h1>Predict (Demo)</h1>
+            <p class="sub">Dùng XGBoost baseline (offline)</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="grid">
+            <div class="mini">
+              <label>like_count</label>
+              <input id="like" type="text" value="500" />
+            </div>
+            <div class="mini">
+              <label>comment_count</label>
+              <input id="comment" type="text" value="20" />
+            </div>
+            <div class="mini" style="grid-column: span 2;">
+              <label>hours_since_publish</label>
+              <input id="hours" type="text" value="100" />
+            </div>
+          </div>
+
+          <div class="row">
+            <button id="predictBtn" type="button">Predict now</button>
+          </div>
+
+          <div class="hint">
+            Lệnh tương đương: <code>predict like=500 comment=20 hours=100</code><br>
+            Output: prob(high-popularity) + pred(label).
+          </div>
+        </div>
+
+        
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("input");
+    const form = document.getElementById("form");
+    const btn = document.getElementById("btn");
+
+    const likeEl = document.getElementById("like");
+    const commentEl = document.getElementById("comment");
+    const hoursEl = document.getElementById("hours");
+    const predictBtn = document.getElementById("predictBtn");
+
+    const history = [];
+
+    function renderTable(payload){
+  const { title, columns, rows } = payload;
+
+  const container = document.createElement("div");
+
+  if (title){
+    const h = document.createElement("div");
+    h.style.fontWeight = "700";
+    h.style.marginBottom = "8px";
+    h.textContent = title;
+    container.appendChild(h);
+  }
+
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+  table.style.fontSize = "13px";
+
+  const thead = document.createElement("thead");
+  const trh = document.createElement("tr");
+  columns.forEach(c=>{
+    const th = document.createElement("th");
+    th.textContent = c;
+    th.style.textAlign = "left";
+    th.style.padding = "8px";
+    th.style.borderBottom = "1px solid rgba(255,255,255,0.12)";
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  rows.forEach(r=>{
+    const tr = document.createElement("tr");
+    r.forEach(cell=>{
+      const td = document.createElement("td");
+      td.textContent = cell;
+      td.style.padding = "8px";
+      td.style.borderBottom = "1px solid rgba(255,255,255,0.08)";
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  container.appendChild(table);
+  return container;
+}
+
+function add(role, payload) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg " + (role === "user" ? "user" : "bot");
+
+  const av = document.createElement("div");
+  av.className = "avatar";
+  av.textContent = role === "user" ? "U" : "B";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+
+  // USER: luôn là string
+  if (role === "user") {
+    bubble.textContent = String(payload);
+  } else {
+    // ASSISTANT: payload có thể là object (table/text) hoặc string
+    if (payload && typeof payload === "object" && payload.type === "table") {
+      bubble.appendChild(renderTable(payload));
+    } else {
+      const text = (payload && typeof payload === "object" && payload.type === "text")
+        ? payload.text
+        : String(payload);
+
+      // 1) hiện chữ
+      const textBlock = document.createElement("div");
+      textBlock.style.whiteSpace = "pre-wrap";
+      textBlock.textContent = text;
+      bubble.appendChild(textBlock);
+
+      // 2) nếu có link ảnh /outputs/*.png thì gắn ảnh dưới
+      const match = text.match(/\/outputs\/[^\s]+?\.(png|jpg|jpeg)/i);
+      if (match) {
+        const img = document.createElement("img");
+        img.src = match[0];
+        img.style.display = "block";
+        img.style.maxWidth = "100%";
+        img.style.borderRadius = "12px";
+        img.style.border = "1px solid rgba(255,255,255,0.12)";
+        img.style.marginTop = "10px";
+        bubble.appendChild(img);
+      }
+    }
+  }
+
+  wrap.appendChild(av);
+  wrap.appendChild(bubble);
+  chat.appendChild(wrap);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+      
+    async function sendMessage(msg) {
+      msg = (msg || "").trim();
+      if (!msg) return;
+
+      add("user", msg);
+      history.push({ role: "user", content: msg });
+
+      btn.disabled = true;
+      btn.textContent = "Đang gửi...";
+
+      try {
+  const r = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: msg, history })
+  });
+
+  const dataRaw = await r.json().catch(() => ({}));
+
+  // Hỗ trợ cả 2 kiểu response:
+  // 1) {type:"text", text:"..."} hoặc {type:"table", ...}
+  // 2) kiểu cũ {reply:"..."}
+  const payload = (dataRaw && dataRaw.type)
+    ? dataRaw
+    : { type: "text", text: dataRaw.reply ?? JSON.stringify(dataRaw) };
+
+  add("assistant", payload);
+
+  // lưu lịch sử: table thì lưu text mô tả, text thì lưu text
+  const contentForHistory =
+    payload.type === "table"
+      ? `[TABLE] ${payload.title || "table"}`
+      : (payload.text || "");
+
+  history.push({ role: "assistant", content: contentForHistory });
+
+} catch (err) {
+  add("assistant", { type: "text", text: "(Lỗi kết nối) " + err });
+} finally {
+  btn.disabled = false;
+  btn.textContent = "Gửi";
+}
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const msg = input.value;
+      input.value = "";
+      sendMessage(msg);
+    });
+
+    document.getElementById("chips").addEventListener("click", (e) => {
+      const el = e.target.closest(".chip");
+      if (!el) return;
+      sendMessage(el.dataset.q);
+    });
+
+    predictBtn.addEventListener("click", () => {
+      const like = (likeEl.value || "").trim();
+      const comment = (commentEl.value || "").trim();
+      const hours = (hoursEl.value || "").trim();
+      sendMessage(`predict like=${like} comment=${comment} hours=${hours}`);
+    });
+
+    add("assistant",
+`Chào bạn! Đây là GovTrendTube Chatbot (offline).
+Gợi ý nhanh:
+- gõ "dataset" để xem dữ liệu có gì
+- gõ "bảng so sánh model" để xem metrics
+- gõ "predict like=500 comment=20 hours=100" để demo dự đoán`);
+  </script>
+</body>
+</html>

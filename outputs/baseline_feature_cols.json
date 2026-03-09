@@ -1,0 +1,8 @@
+[
+  "like_count",
+  "comment_count",
+  "hours_since_publish",
+  "log_like_count",
+  "log_comment_count",
+  "log_hours_since_publish"
+]
