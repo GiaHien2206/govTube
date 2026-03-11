@@ -1,213 +1,336 @@
 <!doctype html>
 <html>
-
 <head>
+  <meta charset="utf-8">
+  <title>GovTrendTube AI Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<title>GovTrendTube AI Dashboard</title>
+  <style>
+    body{
+      background:#0b1020;
+      color:white;
+      font-family:system-ui;
+      margin:0;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    .wrap{
+      max-width:1200px;
+      margin:auto;
+      padding:20px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+    }
 
-<style>
+    .card{
+      background:#121a33;
+      padding:20px;
+      border-radius:15px;
+    }
 
-body{
-background:#0b1020;
-color:white;
-font-family:system-ui;
-margin:0;
-}
+    input{
+      width:100%;
+      padding:10px;
+      margin:6px 0;
+      border-radius:8px;
+      border:none;
+      box-sizing:border-box;
+    }
 
-.wrap{
-max-width:1200px;
-margin:auto;
-padding:20px;
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
-}
+    button{
+      padding:10px 12px;
+      border-radius:8px;
+      border:none;
+      background:#7aa2ff;
+      color:white;
+      cursor:pointer;
+      margin-top:6px;
+    }
 
-.card{
-background:#121a33;
-padding:20px;
-border-radius:15px;
-}
+    button:hover{
+      opacity:0.95;
+    }
 
-input{
-width:100%;
-padding:8px;
-margin:6px 0;
-border-radius:8px;
-border:none;
-}
+    canvas{
+      background:white;
+      border-radius:10px;
+      margin-top:12px;
+      max-width:100%;
+    }
 
-button{
-padding:8px 10px;
-border-radius:8px;
-border:none;
-background:#7aa2ff;
-color:white;
-cursor:pointer;
-}
+    .msg{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:8px;
+      font-size:14px;
+      white-space:pre-wrap;
+    }
 
-canvas{
-background:white;
-border-radius:10px;
-margin-top:10px;
-}
+    .error{
+      background:#4a1f2a;
+      color:#ffd7de;
+      border:1px solid #8a3a4c;
+    }
 
-</style>
+    .success{
+      background:#173126;
+      color:#d5ffe7;
+      border:1px solid #2d7a55;
+    }
 
+    .sub{
+      color:#b9c4e0;
+      font-size:14px;
+      margin-top:6px;
+    }
+
+    img{
+      background:white;
+      border-radius:10px;
+      margin-top:12px;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="wrap">
 
-<div class="wrap">
+    <div class="card">
+      <h2>Manual Prediction</h2>
 
-<div class="card">
+      <input id="like" type="number" min="0" value="500" placeholder="Like count">
+      <input id="comment" type="number" min="0" value="20" placeholder="Comment count">
+      <input id="hours" type="number" min="0" value="100" placeholder="Hours since publish">
 
-<h2>Manual Prediction</h2>
+      <button onclick="predict()">Predict</button>
 
-<input id="like" value="500">
-<input id="comment" value="20">
-<input id="hours" value="100">
+      <div class="sub">Enter likes, comments, and hours since publish.</div>
+      <div id="manualMsg" class="msg" style="display:none;"></div>
 
-<button onclick="predict()">Predict</button>
+      <canvas id="probChart"></canvas>
+    </div>
 
-<canvas id="probChart"></canvas>
+    <div class="card">
+      <h2>YouTube Link Analyzer</h2>
 
-</div>
+      <input id="yturl" placeholder="Paste YouTube link">
+      <button onclick="youtubePredict()">Analyze</button>
 
-<div class="card">
+      <h4 id="title"></h4>
+      <div id="ytMsg" class="msg" style="display:none;"></div>
 
-<h2>YouTube Link Analyzer</h2>
+      <canvas id="ytChart"></canvas>
+    </div>
 
-<input id="yturl" placeholder="Paste YouTube link">
+    <div class="card">
+      <h2>Engagement Growth</h2>
+      <div id="tsMsg" class="msg" style="display:none;"></div>
+      <canvas id="tsChart"></canvas>
+    </div>
 
-<button onclick="youtubePredict()">Analyze</button>
+    <div class="card">
+      <h2>SHAP Feature Importance</h2>
+      <img src="/outputs/shap_summary.png" width="100%" alt="SHAP Feature Importance">
+    </div>
 
-<h4 id="title"></h4>
+    <div class="card">
+      <h2>Burst Detection</h2>
+      <img src="/outputs/time.png" width="100%" alt="Burst Detection">
+    </div>
 
-<canvas id="ytChart"></canvas>
+  </div>
 
-</div>
+  <script>
+    let probChartInstance = null;
+    let ytChartInstance = null;
+    let tsChartInstance = null;
 
-<div class="card">
+    function showMessage(id, text, type="error"){
+      const el = document.getElementById(id);
+      el.style.display = "block";
+      el.className = "msg " + type;
+      el.innerText = text;
+    }
 
-<h2>Engagement Growth</h2>
+    function clearMessage(id){
+      const el = document.getElementById(id);
+      el.style.display = "none";
+      el.innerText = "";
+      el.className = "msg";
+    }
 
-<canvas id="tsChart"></canvas>
+    function destroyChart(chartRef){
+      if (chartRef) {
+        chartRef.destroy();
+      }
+    }
 
-</div>
+    function drawProbChart(canvasId, prob, labelText = "Trending Probability"){
+      const ctx = document.getElementById(canvasId);
 
-<div class="card">
+      const chartData = {
+        labels: ["Trending", "Not Trending"],
+        datasets: [{
+          label: labelText,
+          data: [prob, 1 - prob]
+        }]
+      };
 
-<h2>SHAP Feature Importance</h2>
+      if (canvasId === "probChart") {
+        destroyChart(probChartInstance);
+        probChartInstance = new Chart(ctx, {
+          type: "bar",
+          data: chartData,
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                min: 0,
+                max: 1
+              }
+            }
+          }
+        });
+      } else if (canvasId === "ytChart") {
+        destroyChart(ytChartInstance);
+        ytChartInstance = new Chart(ctx, {
+          type: "bar",
+          data: chartData,
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                min: 0,
+                max: 1
+              }
+            }
+          }
+        });
+      }
+    }
 
-<img src="/outputs/shap_summary.png" width="100%">
+    function drawTimeSeries(ts){
+      const ctx = document.getElementById("tsChart");
+      destroyChart(tsChartInstance);
 
-</div>
+      tsChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ts.hours,
+          datasets: [
+            {
+              label: "Views",
+              data: ts.views
+            },
+            {
+              label: "Likes",
+              data: ts.likes
+            },
+            {
+              label: "Comments",
+              data: ts.comments
+            }
+          ]
+        },
+        options: {
+          responsive: true
+        }
+      });
+    }
 
-<div class="card">
+    async function readJsonSafe(response){
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error("Server did not return valid JSON:\n" + text);
+      }
+    }
 
-<h2>Burst Detection</h2>
+    async function predict(){
+      clearMessage("manualMsg");
 
-<img src="/outputs/time.png" width="100%">
+      try {
+        const like = Number(document.getElementById("like").value);
+        const comment = Number(document.getElementById("comment").value);
+        const hours = Number(document.getElementById("hours").value);
 
-</div>
+        if (Number.isNaN(like) || Number.isNaN(comment) || Number.isNaN(hours)) {
+          showMessage("manualMsg", "Please enter valid numeric values.", "error");
+          return;
+        }
 
-</div>
+        const response = await fetch("/api/predict", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ like, comment, hours })
+        });
 
-<script>
+        const data = await readJsonSafe(response);
 
-function drawProbChart(canvasId,prob){
+        if (!response.ok || data.ok === false) {
+          throw new Error(data.error || "Prediction failed.");
+        }
 
-new Chart(document.getElementById(canvasId),{
+        drawProbChart("probChart", data.prob);
+        showMessage(
+          "manualMsg",
+          `Prediction success
+Probability: ${Number(data.prob).toFixed(4)}
+Class: ${data.pred === 1 ? "Trending" : "Not Trending"}`,
+          "success"
+        );
+      } catch (err) {
+        showMessage("manualMsg", err.message, "error");
+        console.error(err);
+      }
+    }
 
-type:"bar",
+    async function youtubePredict(){
+      clearMessage("ytMsg");
+      clearMessage("tsMsg");
+      document.getElementById("title").innerText = "";
 
-data:{
-labels:["Trending","Not Trending"],
-datasets:[{
-label:"Probability",
-data:[prob,1-prob],
-backgroundColor:["green","red"]
-}]
-}
+      try {
+        const url = document.getElementById("yturl").value.trim();
 
-})
+        if (!url) {
+          showMessage("ytMsg", "Please paste a YouTube link.", "error");
+          return;
+        }
 
-}
+        const response = await fetch("/api/youtube_predict", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ url })
+        });
 
-function drawTimeSeries(ts){
+        const data = await readJsonSafe(response);
 
-new Chart(document.getElementById("tsChart"),{
+        if (!response.ok || data.ok === false) {
+          throw new Error(data.error || "YouTube analysis failed.");
+        }
 
-type:"line",
+        document.getElementById("title").innerText = data.stats?.title || "";
+        drawProbChart("ytChart", data.prob);
+        drawTimeSeries(data.timeseries);
 
-data:{
-labels:ts.hours,
-datasets:[
-{
-label:"Views",
-data:ts.views,
-borderColor:"blue"
-},
-{
-label:"Likes",
-data:ts.likes,
-borderColor:"green"
-},
-{
-label:"Comments",
-data:ts.comments,
-borderColor:"orange"
-}
-]
-}
-
-})
-
-}
-
-async function predict(){
-
-const like=document.getElementById("like").value
-const comment=document.getElementById("comment").value
-const hours=document.getElementById("hours").value
-
-const r=await fetch("/api/predict",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({like,comment,hours})
-})
-
-const data=await r.json()
-
-drawProbChart("probChart",data.prob)
-
-}
-
-async function youtubePredict(){
-
-const url=document.getElementById("yturl").value
-
-const r=await fetch("/api/youtube_predict",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({url})
-})
-
-const data=await r.json()
-
-document.getElementById("title").innerText=data.stats.title
-
-drawProbChart("ytChart",data.prob)
-
-drawTimeSeries(data.timeseries)
-
-}
-
-</script>
-
+        showMessage(
+          "ytMsg",
+          `Analysis success
+Views: ${data.stats.views}
+Likes: ${data.stats.likes}
+Comments: ${data.stats.comments}
+Probability: ${Number(data.prob).toFixed(4)}
+Class: ${data.pred === 1 ? "Trending" : "Not Trending"}`,
+          "success"
+        );
+      } catch (err) {
+        showMessage("ytMsg", err.message, "error");
+        showMessage("tsMsg", "No time-series data to display.", "error");
+        console.error(err);
+      }
+    }
+  </script>
 </body>
-
 </html>
