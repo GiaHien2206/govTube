@@ -1,8 +1,0 @@
-flask
-python-dotenv
-pandas
-numpy
-joblib
-gunicorn
-xgboost
-request
