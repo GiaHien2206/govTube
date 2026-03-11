@@ -8,7 +8,7 @@ from joblib import load
 from flask import send_from_directory
 
 # ===================== Paths & ENV =====================
-PROJECT_ROOT = Path(__file__).resolve().parents[2]      # root project (parent of web_chatbot/)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]      # root project (parent of web_chatbot/)
 OUTPUTS = PROJECT_ROOT / "outputs"
 
 ENV_PATH = Path(__file__).resolve().parent / ".env" 
