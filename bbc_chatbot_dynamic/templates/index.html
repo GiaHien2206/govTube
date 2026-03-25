@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBC News Top 10% View Q&A</title>
+  <style>
+    :root {
+      --bg: #07142b;
+      --panel: #0d1f47;
+      --panel-2: #132a5f;
+      --text: #f5f7ff;
+      --muted: #c0c9e6;
+      --line: rgba(255,255,255,0.12);
+      --accent: #76a7ff;
+      --user: #335cbc;
+      --bot: #11295c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #061127 0%, #07142b 100%);
+      color: var(--text);
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 28px auto;
+      padding: 0 18px 32px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, #0e2350 0%, #0c1d42 100%);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 26px 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.18);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .status-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .status-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .status-value {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, #0d1f47 0%, #0a1a3a 100%);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 16px 32px rgba(0,0,0,.16);
+      margin-bottom: 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin: 0 0 18px;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .quick-wrap { margin: 10px 0 18px; }
+    .quick-title { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .quick-btn {
+      border: 1px solid rgba(118, 167, 255, 0.24);
+      background: rgba(118, 167, 255, 0.08);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.4;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .quick-btn:hover {
+      background: rgba(118, 167, 255, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .chat-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 360px;
+      max-height: 60vh;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+
+    .msg { margin: 12px 0; display: flex; }
+    .msg.user { justify-content: flex-end; }
+
+    .bubble {
+      max-width: 92%;
+      border-radius: 18px;
+      padding: 14px 16px;
+      line-height: 1.6;
+      font-size: 14px;
+      word-wrap: break-word;
+      box-shadow: 0 8px 18px rgba(0,0,0,.14);
+    }
+
+    .user .bubble {
+      background: #335cbc;
+      border-bottom-right-radius: 6px;
+    }
+
+    .bot .bubble {
+      background: #11295c;
+      border-bottom-left-radius: 6px;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .composer {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 62px;
+      max-height: 180px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #f5f6fb;
+      color: #1a2235;
+      padding: 14px 16px;
+      font: inherit;
+      outline: none;
+    }
+
+    button.action {
+      border: none;
+      border-radius: 14px;
+      padding: 0 18px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      min-width: 106px;
+    }
+
+    .send { background: #76a7ff; color: #0a1735; }
+    .clear { background: #26426f; color: var(--text); }
+
+    .hint { margin-top: 10px; color: var(--muted); font-size: 13px; }
+
+    .answer-card { display: flex; flex-direction: column; gap: 10px; }
+    .answer-title { font-size: 16px; font-weight: 800; color: #ffffff; }
+
+    .answer-table, .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .answer-table th, .answer-table td,
+    .mini-table th, .mini-table td {
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    .answer-table th, .mini-table th {
+      background: rgba(118, 167, 255, 0.14);
+      font-weight: 700;
+    }
+
+    .answer-card ul { margin: 0; padding-left: 18px; }
+    .answer-card p { margin: 0; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .two-col > div {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .two-col h4 { margin: 0 0 8px; font-size: 14px; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      background: rgba(118, 167, 255, 0.12);
+      border: 1px solid rgba(118, 167, 255, 0.16);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .typing {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .typing span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #b6c8ff;
+      display: inline-block;
+      animation: pulse 1s infinite ease-in-out;
+    }
+
+    .typing span:nth-child(2) { animation-delay: .15s; }
+    .typing span:nth-child(3) { animation-delay: .3s; }
+
+    @keyframes pulse {
+      0%, 80%, 100% { transform: scale(.7); opacity: .55; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    .gallery-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .gallery-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter-btn {
+      border: 1px solid rgba(118, 167, 255, 0.24);
+      background: rgba(118, 167, 255, 0.08);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .filter-btn.active {
+      background: rgba(118, 167, 255, 0.22);
+      border-color: rgba(118, 167, 255, 0.4);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .gallery-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gallery-card img {
+      width: 100%;
+      height: 230px;
+      object-fit: contain;
+      background: rgba(255,255,255,0.03);
+      cursor: zoom-in;
+    }
+
+    .gallery-info {
+      padding: 12px 14px 14px;
+    }
+
+    .gallery-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .gallery-tag {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.86);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 20px;
+    }
+
+    .lightbox.open { display: flex; }
+
+    .lightbox-inner {
+      max-width: 96vw;
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .lightbox img {
+      max-width: 96vw;
+      max-height: 84vh;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #0d1630;
+    }
+
+    .lightbox-title {
+      color: #fff;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .close-lightbox {
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      border: none;
+      background: rgba(255,255,255,0.12);
+      color: #fff;
+      font-size: 24px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    @media (max-width: 760px) {
+      .hero h1 { font-size: 23px; }
+      .composer { grid-template-columns: 1fr; }
+      button.action { min-height: 48px; }
+      .bubble { max-width: 100%; }
+      .gallery-card img { height: 190px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <h1>BBC News Top 10% View Q&amp;A</h1>
+      <p>
+        Ứng dụng này chỉ dùng <b>Chatbot Q&amp;A</b> và đọc dữ liệu trực tiếp từ thư mục <b>outputs_bbc</b>.
+        Mọi câu trả lời đều lấy từ file output thật của m, không hardcode số. Các câu hỏi cụ thể như
+        <b>metadata-only</b>, <b>full-feature</b>, <b>top feature</b>, <b>class imbalance</b> đã được ưu tiên match đúng.
+      </p>
+
+      <div class="status-grid">
+        <div class="status-card">
+          <div class="status-label">Tổng số dòng dữ liệu</div>
+          <div class="status-value">{{ "{:,}".format(status.rows|int) }}</div>
+        </div>
+        <div class="status-card">
+          <div class="status-label">Ngưỡng top 10%</div>
+          <div class="status-value">{{ "{:,}".format(status.threshold|int) }}</div>
+        </div>
+        <div class="status-card">
+          <div class="status-label">Số ảnh output đang có</div>
+          <div class="status-value">{{ "{:,}".format(status.images|int) }}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Chatbot Q&amp;A</h2>
+      <p class="sub">
+        Hỏi trực tiếp bằng tiếng Việt hoặc bấm các nút hỏi nhanh bên dưới. Những câu phù hợp dạng bảng sẽ được hiển thị dưới dạng bảng để dễ đọc hơn.
+      </p>
+
+      <div class="quick-wrap">
+        <div class="quick-title">Quick questions</div>
+        <div class="quick-grid">
+          {% for q in quick_questions %}
+            <button class="quick-btn" data-question="{{ q.label }}" data-intent="{{ q.intent }}">
+              {{ q.label }}
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="chat-box" id="chatBox">
+        <div class="msg bot">
+          <div class="bubble">
+            <div class="answer-card">
+              <div class="answer-title">Xin chào</div>
+              <p>Mình sẽ trả lời dựa trên dữ liệu thật trong outputs_bbc. M có thể hỏi về dataset, target, metadata-only, full-feature, feature importance, confusion matrix hoặc conclusion.</p>
+              <div class="chips">
+                <span class="chip">Dataset</span>
+                <span class="chip">Metadata-only là gì?</span>
+                <span class="chip">Full-feature là gì?</span>
+                <span class="chip">Best model</span>
+                <span class="chip">Top feature</span>
+                <span class="chip">Conclusion</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <textarea id="questionInput" placeholder="Ví dụ: Metadata-only là gì?&#10;Kết quả metadata-only là gì?&#10;Top feature quan trọng nhất là gì?"></textarea>
+        <button class="action send" id="sendBtn">Send</button>
+        <button class="action clear" id="clearBtn">Clear Chat</button>
+      </div>
+      <div class="hint">Mẹo: bấm Quick questions để ra đúng intent nhanh hơn.</div>
+    </section>
+
+    <section class="panel">
+      <div class="gallery-header">
+        <div>
+          <h2 style="margin-bottom:6px">Output Image Gallery</h2>
+          <p class="sub" style="margin:0">Hiển thị toàn bộ ảnh đang có trong outputs_bbc để m xem trực tiếp ngay trên web.</p>
+        </div>
+
+        <div class="gallery-filter">
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="full-feature">Full-feature</button>
+          <button class="filter-btn" data-filter="metadata-only">Metadata-only</button>
+          <button class="filter-btn" data-filter="importance">Importance</button>
+          <button class="filter-btn" data-filter="other">Other</button>
+        </div>
+      </div>
+
+      <div class="gallery-grid" id="galleryGrid">
+        {% for img in gallery_images %}
+        <div class="gallery-card" data-tag="{{ img.tag }}">
+          <img src="{{ img.url }}" alt="{{ img.title }}" data-full="{{ img.url }}" data-title="{{ img.title }}">
+          <div class="gallery-info">
+            <div class="gallery-title">{{ img.title }}</div>
+            <div class="gallery-tag">{{ img.tag }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="close-lightbox" id="closeLightbox">&times;</button>
+    <div class="lightbox-inner">
+      <img id="lightboxImg" src="" alt="">
+      <div class="lightbox-title" id="lightboxTitle"></div>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const input = document.getElementById('questionInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    function addMessage(role, htmlContent) {
+      const wrapper = document.createElement('div');
+      wrapper.className = `msg ${role}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.innerHTML = htmlContent;
+      wrapper.appendChild(bubble);
+      chatBox.appendChild(wrapper);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return wrapper;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function askQuestion(question, forcedIntent = null) {
+      const text = (question || '').trim();
+      if (!text && !forcedIntent) return;
+
+      addMessage('user', `<div>${escapeHtml(text || forcedIntent)}</div>`);
+      input.value = '';
+
+      const typing = addMessage('bot', `<div class="typing"><span></span><span></span><span></span></div>`);
+
+      try {
+        const payload = { question: text };
+        if (forcedIntent) payload.intent = forcedIntent;
+
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        typing.remove();
+
+        if (!res.ok || !data.ok) {
+          addMessage('bot', `<div class="answer-card"><div class="answer-title">Lỗi</div><p>${escapeHtml(data.error || 'Không thể xử lý câu hỏi.')}</p></div>`);
+          return;
+        }
+
+        addMessage('bot', data.answer_html);
+      } catch (err) {
+        typing.remove();
+        addMessage('bot', `<div class="answer-card"><div class="answer-title">Lỗi kết nối</div><p>Không thể kết nối tới server. Hãy kiểm tra app.py đang chạy ở cổng 3000.</p></div>`);
+      }
+    }
+
+    sendBtn.addEventListener('click', () => askQuestion(input.value));
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        askQuestion(input.value);
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      chatBox.innerHTML = `
+        <div class="msg bot">
+          <div class="bubble">
+            <div class="answer-card">
+              <div class="answer-title">Đã làm mới cuộc trò chuyện</div>
+              <p>Hãy chọn một câu hỏi nhanh hoặc nhập câu hỏi mới.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    document.querySelectorAll('.quick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        askQuestion(btn.dataset.question || btn.innerText, btn.dataset.intent || null);
+      });
+    });
+
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.gallery-card');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+        cards.forEach(card => {
+          const tag = card.dataset.tag;
+          card.style.display = (filter === 'all' || tag === filter) ? '' : 'none';
+        });
+      });
+    });
+
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxTitle = document.getElementById('lightboxTitle');
+    const closeLightbox = document.getElementById('closeLightbox');
+
+    document.querySelectorAll('.gallery-card img').forEach(img => {
+      img.addEventListener('click', () => {
+        lightboxImg.src = img.dataset.full;
+        lightboxTitle.textContent = img.dataset.title || '';
+        lightbox.classList.add('open');
+      });
+    });
+
+    closeLightbox.addEventListener('click', () => {
+      lightbox.classList.remove('open');
+      lightboxImg.src = '';
+    });
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        lightbox.classList.remove('open');
+        lightboxImg.src = '';
+      }
+    });
+  </script>
+</body>
+</html>

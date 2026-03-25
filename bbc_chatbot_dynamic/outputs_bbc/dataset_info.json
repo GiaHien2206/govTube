@@ -1,0 +1,90 @@
+{
+  "raw_shape": [
+    20000,
+    7
+  ],
+  "processed_shape": [
+    20000,
+    21
+  ],
+  "metadata_feature_shape": [
+    20000,
+    16
+  ],
+  "full_feature_shape": [
+    20000,
+    20
+  ],
+  "raw_columns": [
+    "video_id",
+    "title",
+    "publishedAt",
+    "viewCount",
+    "likeCount",
+    "commentCount",
+    "duration"
+  ],
+  "processed_columns": [
+    "video_id",
+    "title",
+    "publishedAt",
+    "viewCount",
+    "likeCount",
+    "commentCount",
+    "duration",
+    "duration_seconds",
+    "title_length",
+    "title_word_count",
+    "has_number_in_title",
+    "has_question_mark",
+    "has_keyword",
+    "upload_hour",
+    "upload_day",
+    "is_weekend",
+    "hour_sin",
+    "hour_cos",
+    "engagement",
+    "like_comment_ratio",
+    "is_top10_view"
+  ],
+  "metadata_features": [
+    "duration_seconds",
+    "title_length",
+    "title_word_count",
+    "has_keyword",
+    "has_number_in_title",
+    "has_question_mark",
+    "hour_sin",
+    "hour_cos",
+    "is_weekend",
+    "upload_day_Friday",
+    "upload_day_Monday",
+    "upload_day_Saturday",
+    "upload_day_Sunday",
+    "upload_day_Thursday",
+    "upload_day_Tuesday",
+    "upload_day_Wednesday"
+  ],
+  "full_features": [
+    "duration_seconds",
+    "title_length",
+    "title_word_count",
+    "has_keyword",
+    "has_number_in_title",
+    "has_question_mark",
+    "hour_sin",
+    "hour_cos",
+    "is_weekend",
+    "upload_day_Friday",
+    "upload_day_Monday",
+    "upload_day_Saturday",
+    "upload_day_Sunday",
+    "upload_day_Thursday",
+    "upload_day_Tuesday",
+    "upload_day_Wednesday",
+    "likeCount",
+    "commentCount",
+    "engagement",
+    "like_comment_ratio"
+  ]
+}

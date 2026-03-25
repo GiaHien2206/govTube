@@ -1,0 +1,62 @@
+{
+  "project": "BBC News Top 10% View Prediction",
+  "target_name": "is_top10_view",
+  "target_threshold_90": 469012.3000000002,
+  "random_state": 42,
+  "test_size": 0.2,
+  "metadata_feature_count": 16,
+  "full_feature_count": 20,
+  "rows_used": 20000,
+  "best_model_for_app": "XGBoost",
+  "best_model_setting": "Full-feature",
+  "results": [
+    {
+      "Feature Setting": "Metadata-only",
+      "Model": "Logistic Regression",
+      "Accuracy": 0.5962,
+      "Precision": 0.1412,
+      "Recall": 0.5975,
+      "F1": 0.2284
+    },
+    {
+      "Feature Setting": "Metadata-only",
+      "Model": "Random Forest",
+      "Accuracy": 0.898,
+      "Precision": 0.3333,
+      "Recall": 0.02,
+      "F1": 0.0377
+    },
+    {
+      "Feature Setting": "Metadata-only",
+      "Model": "XGBoost",
+      "Accuracy": 0.7298,
+      "Precision": 0.1625,
+      "Recall": 0.41,
+      "F1": 0.2328
+    },
+    {
+      "Feature Setting": "Full-feature",
+      "Model": "Logistic Regression",
+      "Accuracy": 0.935,
+      "Precision": 0.6159,
+      "Recall": 0.93,
+      "F1": 0.741
+    },
+    {
+      "Feature Setting": "Full-feature",
+      "Model": "Random Forest",
+      "Accuracy": 0.964,
+      "Precision": 0.8422,
+      "Recall": 0.7875,
+      "F1": 0.814
+    },
+    {
+      "Feature Setting": "Full-feature",
+      "Model": "XGBoost",
+      "Accuracy": 0.9553,
+      "Precision": 0.7241,
+      "Recall": 0.8925,
+      "F1": 0.7996
+    }
+  ]
+}

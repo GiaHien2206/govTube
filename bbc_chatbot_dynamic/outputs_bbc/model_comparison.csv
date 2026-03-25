@@ -1,0 +1,7 @@
+Feature Setting,Model,Accuracy,Precision,Recall,F1
+Metadata-only,Logistic Regression,0.5962,0.1412,0.5975,0.2284
+Metadata-only,Random Forest,0.898,0.3333,0.02,0.0377
+Metadata-only,XGBoost,0.7298,0.1625,0.41,0.2328
+Full-feature,Logistic Regression,0.935,0.6159,0.93,0.741
+Full-feature,Random Forest,0.964,0.8422,0.7875,0.814
+Full-feature,XGBoost,0.9553,0.7241,0.8925,0.7996

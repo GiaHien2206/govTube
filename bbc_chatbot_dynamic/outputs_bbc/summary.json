@@ -1,0 +1,25 @@
+{
+  "project": "BBC News Top 10% View Prediction",
+  "notes": "Predict whether a BBC News video belongs to the top 10% by views.",
+  "top10_threshold_view_count": 469012.3000000002,
+  "best_model_summary": {
+    "Feature Setting": "Full-feature",
+    "Model": "XGBoost",
+    "Accuracy": 0.9553,
+    "Precision": 0.7241,
+    "Recall": 0.8925,
+    "F1": 0.7996
+  },
+  "keyword_list": [
+    "crisis",
+    "war",
+    "election",
+    "uk",
+    "trump",
+    "israel",
+    "russia",
+    "bbc",
+    "president",
+    "attack"
+  ]
+}
